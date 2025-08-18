@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: background-color 0.3s;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .tab:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .block {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .transaction {
+            background-color: #e8f4fd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 3px solid #2980b9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .balance-card {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .balance-item {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .balance-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .mining-status {
+            padding: 10px;
+            background-color: #f1c40f;
+            color: #333;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-message {
+            padding: 10px;
+            background-color: #2ecc71;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .error-message {
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Blockchain Interface</h1>
+            <p>Interact with your blockchain implementation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="mining-status" id="miningStatus">Mining in progress...</div>
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="blockchain">Blockchain</div>
+            <div class="tab" data-tab="transactions">Transactions</div>
+            <div class="tab" data-tab="mining">Mining</div>
+            <div class="tab" data-tab="balances">Balances</div>
+        </div>
+
+        <div class="tab-content active" id="blockchain">
+            <h2>Blockchain Explorer</h2>
+            <div class="loader" id="blockchainLoader"></div>
+            <div id="blockchainContent">
+                <div class="card">
+                    <h3>Blockchain Information</h3>
+                    <p><strong>Total Blocks:</strong> <span id="totalBlocks">0</span></p>
+                    <p><strong>Difficulty:</strong> <span id="difficulty">2</span></p>
+                    <p><strong>Mining Reward:</strong> <span id="miningReward">100</span></p>
+                    <p><strong>Is Chain Valid:</strong> <span id="isChainValid">Yes</span></p>
+                </div>
+
+                <h3>Blocks</h3>
+                <div id="blocksContainer">
+                    <!-- Blocks will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="transactions">
+            <h2>Create Transaction</h2>
+            <div class="card">
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="sender">Sender:</label>
+                        <input type="text" id="sender" name="sender" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiver">Receiver:</label>
+                        <input type="text" id="receiver" name="receiver" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" name="amount" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit">Submit Transaction</button>
+                </form>
+            </div>
+
+            <h2>Pending Transactions</h2>
+            <div class="loader" id="pendingTransactionsLoader"></div>
+            <div id="pendingTransactionsContainer" class="card">
+                <!-- Pending transactions will be added here dynamically -->
+                <p>No pending transactions.</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="mining">
+            <h2>Mining Control</h2>
+            <div class="card">
+                <div class="form-group">
+                    <label for="minerAddress">Miner Address:</label>
+                    <input type="text" id="minerAddress" name="minerAddress" value="miner1_address">
+                </div>
+                <button id="startMiningBtn">Start Mining</button>
+                <button id="stopMiningBtn">Stop Mining</button>
+            </div>
+
+            <h2>Mining Statistics</h2>
+            <div class="card">
+                <p><strong>Blocks Mined:</strong> <span id="blocksMined">0</span></p>
+                <p><strong>Total Mining Rewards:</strong> <span id="totalRewards">0</span></p>
+                <p><strong>Mining Status:</strong> <span id="miningStatusText">Idle</span></p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="balances">
+            <h2>Account Balances</h2>
+            <div class="loader" id="balancesLoader"></div>
+            <div class="balance-card" id="balancesContainer">
+                <!-- Balances will be added here dynamically -->
+            </div>
+
+            <div class="card">
+                <h3>Check Balance</h3>
+                <div class="form-group">
+                    <label for="balanceAddress">Address:</label>
+                    <input type="text" id="balanceAddress" name="balanceAddress">
+                </div>
+                <button id="checkBalanceBtn">Check Balance</button>
+                <div id="balanceResult" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated blockchain data
+        const blockchain = {
+            chain: [],
+            pendingTransactions: [],
+            difficulty: 2,
+            miningReward: 100,
+            balances: {
+                'alice': -50,
+                'bob': 20,
+                'charlie': 30,
+                'miner1_address': 200,
+                'miner2_address': 200
+            },
+            isMining: false
+        };
+
+        // Initialize with some blocks
+        function initializeBlockchain() {
+            // Genesis block
+            blockchain.chain.push({
+                index: 0,
+                timestamp: Date.now() - 1000000,
+                transactions: [],
+                previousHash: '0',
+                hash: 'b877407e4c',
+                nonce: 0
+            });
+
+            // Block 1
+            blockchain.chain.push({
+                index: 1,
+                timestamp: Date.now() - 800000,
+                transactions: [
+                    { sender: 'BLOCKCHAIN', receiver: 'miner1_address', amount: 100, timestamp: Date.now() - 810000 },
+                    { sender: 'alice', receiver: 'bob', amount: 50, timestamp: Date.now() - 820000 }
+                ],
+                previousHash: 'b877407e4c',
+                hash: '0050cfa14f',
+                nonce: 73
+            });
+
+            // Block 2
+            blockchain.chain.push({
+                index: 2,
+                timestamp: Date.now() - 600000,
+                transactions: [
+                    { sender: 'BLOCKCHAIN', receiver: 'miner2_address', amount: 100, timestamp: Date.now() - 610000 }
+                ],
+                previousHash: '0050cfa14f',
+                hash: '009a329d92',
+                nonce: 19
+            });
+
+            // Block 3
+            blockchain.chain.push({
+                index: 3,
+                timestamp: Date.now() - 400000,
+                transactions: [
+                    { sender: 'bob', receiver: 'charlie', amount: 25, timestamp: Date.now() - 410000 },
+                    { sender: 'charlie', receiver: 'alice', amount: 10, timestamp: Date.now() - 420000 },
+                    { sender: 'BLOCKCHAIN', receiver: 'miner1_address', amount: 100, timestamp: Date.now() - 430000 }
+                ],
+                previousHash: '009a329d92',
+                hash: '00746bc27f',
+                nonce: 141
+            });
+
+            // Block 4
+            blockchain.chain.push({
+                index: 4,
+                timestamp: Date.now() - 200000,
+                transactions: [
+                    { sender: 'BLOCKCHAIN', receiver: 'miner2_address', amount: 100, timestamp: Date.now() - 210000 }
+                ],
+                previousHash: '00746bc27f',
+                hash: '0042ebbfa1',
+                nonce: 63
+            });
+
+            // Add some pending transactions
+            blockchain.pendingTransactions.push(
+                { sender: 'alice', receiver: 'charlie', amount: 15, timestamp: Date.now() - 100000 },
+                { sender: 'bob', receiver: 'alice', amount: 5, timestamp: Date.now() - 90000 }
+            );
+        }
+
+        // Initialize the blockchain
+        initializeBlockchain();
+
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and tab contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // Refresh content when switching tabs
+                if (tabId === 'blockchain') {
+                    renderBlockchain();
+                } else if (tabId === 'transactions') {
+                    renderPendingTransactions();
+                } else if (tabId === 'balances') {
+                    renderBalances();
+                }
+            });
+        });
+
+        // Render blockchain information and blocks
+        function renderBlockchain() {
+            document.getElementById('blockchainLoader').style.display = 'block';
+            
+            // Simulate network delay
+            setTimeout(() => {
+                document.getElementById('totalBlocks').textContent = blockchain.chain.length;
+                document.getElementById('difficulty').textContent = blockchain.difficulty;
+                document.getElementById('miningReward').textContent = blockchain.miningReward;
+                document.getElementById('isChainValid').textContent = 'Yes';
+                
+                const blocksContainer = document.getElementById('blocksContainer');
+                blocksContainer.innerHTML = '';
+                
+                // Render blocks in reverse order (newest first)
+                blockchain.chain.slice().reverse().forEach(block => {
+                    const blockElement = document.createElement('div');
+                    blockElement.className = 'block';
+                    
+                    const blockHeader = document.createElement('div');
+                    blockHeader.className = 'block-header';
+                    blockHeader.innerHTML = `
+                        <span>Block #${block.index}</span>
+                        <span>Hash: ${block.hash}</span>
+                    `;
+                    
+                    const blockContent = document.createElement('div');
+                    blockContent.innerHTML = `
+                        <p><strong>Previous Hash:</strong> ${block.previousHash}</p>
+                        <p><strong>Timestamp:</strong> ${new Date(block.timestamp).toLocaleString()}</p>
+                        <p><strong>Nonce:</strong> ${block.nonce}</p>
+                        <p><strong>Transactions:</strong> ${block.transactions.length}</p>
+                    `;
+                    
+                    blockElement.appendChild(blockHeader);
+                    blockElement.appendChild(blockContent);
+                    
+                    // Add transactions if there are any
+                    if (block.transactions.length > 0) {
+                        const transactionsTitle = document.createElement('p');
+                        transactionsTitle.innerHTML = '<strong>Transaction Details:</strong>';
+                        blockElement.appendChild(transactionsTitle);
+                        
+                        block.transactions.forEach(tx => {
+                            const txElement = document.createElement('div');
+                            txElement.className = 'transaction';
+                            txElement.innerHTML = `
+                                <p><strong>From:</strong> ${tx.sender}</p>
+                                <p><strong>To:</strong> ${tx.receiver}</p>
+                                <p><strong>Amount:</strong> ${tx.amount}</p>
+                                <p><strong>Time:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
+                            `;
+                            blockElement.appendChild(txElement);
+                        });
+                    }
+                    
+                    blocksContainer.appendChild(blockElement);
+                });
+                
+                document.getElementById('blockchainLoader').style.display = 'none';
+            }, 500);
+        }
+
+        // Render pending transactions
+        function renderPendingTransactions() {
+            document.getElementById('pendingTransactionsLoader').style.display = 'block';
+            
+            // Simulate network delay
+            setTimeout(() => {
+                const pendingTransactionsContainer = document.getElementById('pendingTransactionsContainer');
+                pendingTransactionsContainer.innerHTML = '';
+                
+                if (blockchain.pendingTransactions.length === 0) {
+                    pendingTransactionsContainer.innerHTML = '<p>No pending transactions.</p>';
+                } else {
+                    blockchain.pendingTransactions.forEach(tx => {
+                        const txElement = document.createElement('div');
+                        txElement.className = 'transaction';
+                        txElement.innerHTML = `
+                            <p><strong>From:</strong> ${tx.sender}</p>
+                            <p><strong>To:</strong> ${tx.receiver}</p>
+                            <p><strong>Amount:</strong> ${tx.amount}</p>
+                            <p><strong>Time:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
+                        `;
+                        pendingTransactionsContainer.appendChild(txElement);
+                    });
+                }
+                
+                document.getElementById('pendingTransactionsLoader').style.display = 'none';
+            }, 500);
+        }
+
+        // Render account balances
+        function renderBalances() {
+            document.getElementById('balancesLoader').style.display = 'block';
+            
+            // Simulate network delay
+            setTimeout(() => {
+                const balancesContainer = document.getElementById('balancesContainer');
+                balancesContainer.innerHTML = '';
+                
+                for (const [address, balance] of Object.entries(blockchain.balances)) {
+                    const balanceElement = document.createElement('div');
+                    balanceElement.className = 'balance-item';
+                    balanceElement.innerHTML = `
+                        <p><strong>${address}</strong></p>
+                        <p class="balance-value">${balance}</p>
+                    `;
+                    balancesContainer.appendChild(balanceElement);
+                }
+                
+                document.getElementById('balancesLoader').style.display = 'none';
+            }, 500);
+        }
+
+        // Handle transaction form submission
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const sender = document.getElementById('sender').value;
+            const receiver = document.getElementById('receiver').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            // Validate inputs
+            if (!sender || !receiver || isNaN(amount) || amount <= 0) {
+                showError('Please fill all fields with valid values.');
+                return;
+            }
+            
+            // Create new transaction
+            const newTransaction = {
+                sender: sender,
+                receiver: receiver,
+                amount: amount,
+                timestamp: Date.now()
+            };
+            
+            // Add to pending transactions
+            blockchain.pendingTransactions.push(newTransaction);
+            
+            // Show success message
+            showSuccess('Transaction submitted successfully!');
+            
+            // Reset form
+            document.getElementById('transactionForm').reset();
+            
+            // Refresh pending transactions
+            renderPendingTransactions();
+        });
+
+        // Handle mining controls
+        document.getElementById('startMiningBtn').addEventListener('click', function() {
+            const minerAddress = document.getElementById('minerAddress').value;
+            
+            if (!minerAddress) {
+                showError('Please enter a miner address.');
+                return;
+            }
+            
+            if (blockchain.pendingTransactions.length === 0) {
+                showError('No transactions to mine.');
+                return;
+            }
+            
+            // Start mining simulation
+            blockchain.isMining = true;
+            document.getElementById('miningStatusText').textContent = 'Mining';
+            document.getElementById('miningStatus').style.display = 'block';
+            
+            // Simulate mining process
+            setTimeout(() => {
+                // Create mining reward transaction
+                const rewardTx = {
+                    sender: 'BLOCKCHAIN',
+                    receiver: minerAddress,
+                    amount: blockchain.miningReward,
+                    timestamp: Date.now()
+                };
+                
+                // Create new block
+                const newBlock = {
+                    index: blockchain.chain.length,
+                    timestamp: Date.now(),
+                    transactions: [...blockchain.pendingTransactions, rewardTx],
+                    previousHash: blockchain.chain[blockchain.chain.length - 1].hash,
+                    hash: '00' + Math.random().toString(16).substr(2, 8),
+                    nonce: Math.floor(Math.random() * 200)
+                };
+                
+                // Add block to chain
+                blockchain.chain.push(newBlock);
+                
+                // Update balances
+                newBlock.transactions.forEach(tx => {
+                    if (!blockchain.balances[tx.sender]) {
+                        blockchain.balances[tx.sender] = 0;
+                    }
+                    if (!blockchain.balances[tx.receiver]) {
+                        blockchain.balances[tx.receiver] = 0;
+                    }
+                    
+                    if (tx.sender !== 'BLOCKCHAIN') {
+                        blockchain.balances[tx.sender] -= tx.amount;
+                    }
+                    blockchain.balances[tx.receiver] += tx.amount;
+                });
+                
+                // Clear pending transactions
+                blockchain.pendingTransactions = [];
+                
+                // Update mining status
+                blockchain.isMining = false;
+                document.getElementById('miningStatusText').textContent = 'Idle';
+                document.getElementById('miningStatus').style.display = 'none';
+                document.getElementById('blocksMined').textContent = parseInt(document.getElementById('blocksMined').textContent) + 1;
+                document.getElementById('totalRewards').textContent = parseInt(document.getElementById('totalRewards').textContent) + blockchain.miningReward;
+                
+                // Show success message
+                showSuccess('Block mined successfully!');
+                
+                // Refresh views
+                renderBlockchain();
+                renderPendingTransactions();
+                renderBalances();
+            }, 3000);
+        });
+
+        document.getElementById('stopMiningBtn').addEventListener('click', function() {
+            if (blockchain.isMining) {
+                blockchain.isMining = false;
+                document.getElementById('miningStatusText').textContent = 'Idle';
+                document.getElementById('miningStatus').style.display = 'none';
+                showSuccess('Mining stopped.');
+            } else {
+                showError('Mining is not in progress.');
+            }
+        });
+
+        // Handle balance check
+        document.getElementById('checkBalanceBtn').addEventListener('click', function() {
+            const address = document.getElementById('balanceAddress').value;
+            
+            if (!address) {
+                showError('Please enter an address.');
+                return;
+            }
+            
+            const balance = blockchain.balances[address] || 0;
+            document.getElementById('balanceResult').innerHTML = `
+                <div class="balance-item" style="margin: 0;">
+                    <p><strong>${address}</strong></p>
+                    <p class="balance-value">${balance}</p>
+                </div>
+            `;
+        });
+
+        // Helper functions for showing messages
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize the interface
+        renderBlockchain();
+    </script>
+</body>
+</html>
