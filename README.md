@@ -1,5 +1,5 @@
 # Blockchain Concurrency Implementation
-
+Concept by DeeTheCreator
 This project demonstrates a simple blockchain implementation with concurrency features using both Rust and Go. The implementations showcase how each language handles concurrent operations in a blockchain context.
 
 ## Project Structure
